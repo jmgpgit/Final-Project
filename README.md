@@ -6,29 +6,27 @@ First we create the basic framework on which we can work. We require the use of 
 
 Network architecture:
 
----
-title: "Latex and TikZ in knitr chunks"
-author: "Me"
-header-includes:
-   - \usepackage{xspace}
-   - \usepackage{tikz}
-   - \usetikzlibrary{shapes.geometric,arrows}
-   - \def\TikZ{Ti\emph{k}Z\ }
-output:
-  pdf_document 
----
 
-\begin{tikzpicture}[node distance=2cm, auto]  
-    \tikzstyle{decision}=[diamond, draw, fill=blue!20, text width=4.5em, text badly centered, node distance=3cm, inner sep-0pt]  
-    \tikzstyle{block}=[rectangle, draw, fill=blue!20, text width=5em, text badly centered, rounded corners, minimum height=4em]  
-    \tikzstyle{line}=[draw, -latex']  
-    \tikzstyle{terminator} = [ draw, ellipse, fill=red!20, node distance=3cm, minimum height=2em]    
-    \node [terminator] (puc) {Power-Up Reset};  
-    \node [block, below of=puc] (wdt)  {Stop Watchdog};  
-    \node [block, below of=wdt] (port) {Setup Port Pins};  
-    \node [block, below of=port] (loop) {Loop Forever};  
-    \path [line] (puc)  -- (wdt);  
-    \path [line] (wdt)  -- (port);  
-    \path [line] (port) -- (loop);  
-    \path [line] (loop) -- (loop);  
-\end{tikzpicture}
+```mermaid
+
+flowchart TD
+    A[Vertex] -->|add weight| B(Weighted Vertex)
+    E[Edge] -->|add weight| G[Weighted Edge]
+    E[Edge] -->|add direction| H[Directed Edge]
+    G[Weighted Edge] --->|add direction| I
+    H[Directed Edge] --->|add weight| I
+    I(Directed Weighted Edge) <--> C{Network}
+    B <--> C{Network}
+
+    C -->|flow| D[Path]
+    C -->|flow| X[Path]
+    C -->|flow| Z[Path]
+    C -->|flow| Y[...]
+
+
+
+    D -->J[Optimization]
+    Z -->J[Optimization]
+    X -->J[Optimization]
+    Y -->J[Optimization]
+```
