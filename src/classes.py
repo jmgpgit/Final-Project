@@ -288,6 +288,10 @@ class Edge:
     def flip(self):
         return -self
     
+    def is_incident(self, node):
+        return node == self.nodes[1]
+    
+    
     
 class Network:
     def __init__(self, nodes = None, edges = None):
@@ -490,6 +494,21 @@ class Network:
     def remove_edges(self, edges):
         for edge in edges:
             self.remove_edge(edge)
+            
+    def move_node(self, node, new_coords):
+        new_edges = []
+        new_node = Node(new_coords,node.weight)
+        for edge in self.edge_adjacency[node]:
+            if edge[0] == node:
+                new_edges.append(Edge((new_node,edge[1]),edge.dir,edge.weight,edge.key))
+            elif edge[1] == node:
+                new_edges.append(Edge((edge[0],new_node),edge.dir,edge.weight,edge.key))
+        
+        self.remove_node(node)
+        self.add_node(new_node)
+        self.add_edges(new_edges)
+
+            
     
     #############################################
     # Components
