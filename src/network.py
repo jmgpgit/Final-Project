@@ -43,7 +43,6 @@ class Node:
         self.y = None
         self._weight = constant_fn(None)
         self.id = uuid4().hex    
-        self.name = None
 
     @property
     def weight(self):
@@ -112,12 +111,11 @@ class Node:
         return item in self.loc
     
     @classmethod
-    def make(cls, x, y, weight=constant_fn(None), name = None):
+    def make(cls, x, y, weight=constant_fn(None)):
         node = cls()
         node.x = x
         node.y = y
         node.weight = weight
-        node.name = name
         return node
     
     @staticmethod
@@ -305,8 +303,8 @@ class Edge:
     
     
 class Network:
-    def __init__(self, nodes = None, edges = None):
-        self.nodes = nodes if nodes else []
+    def __init__(self, nodes, edges = None):
+        self.nodes = nodes
         self.edges = edges if edges else []
         self._node_translator = { node.id : node for node in self.nodes }
         self._edge_translator = { edge.id : edge for edge in self.edges }
