@@ -1,3 +1,4 @@
+<img src="readme_images/BHMtubemap.avif" width=900 height=600 />
 
 # Network Optimisation
 
@@ -5,7 +6,7 @@
 
 
 
-<img src="readme_images/BHMtubemap.avif" width=900 height=600 />
+<img src="readme_images/tutorial-34.png" width=512 height=384 />
 
 ### Structure
 
