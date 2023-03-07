@@ -1,4 +1,4 @@
-<img src="readme_images/BHMtubemap.avif" width=900 height=600 />
+<img src="readme_images/BHMtubemap.avif" width=900  />
 
 # Network Optimisation
 
@@ -6,7 +6,7 @@
 
 
 
-<img src="readme_images/tutorial-34.png" width=512 height=384 />
+
 
 ### Structure
 
@@ -16,7 +16,11 @@ The network consists of two basic components.
 
 These are the individual *entities* of the network. They can represent anything from a person to a computer to a city. They are connected by **edges**. A node can hold additional information about itself. One of the most used attributes given to a node is **weight**; weight can represent the relative importance of a node with respect to its neighbours.
 
+<img style="float: right;" src="readme_images/internet-schema-5.png" width=370/>
+
 Let us consider an **example** of a node; a person. A person can be connected to other people, forming a social network. A person can also be connected to a server, forming a network of people and servers. Each individual could be assigned a weight, that can be ascribed a physical meaning. A simple example of a weight could be the **degree** of the node, that is, the amount of total connections that person has. However, we can also ascribe a different meaning, such as the amount of money that person has. In this latter case, note that the weight could be negative as well as any real number. A server could also be assigned a different type of weight, such as its current server load - if it were at capacity, then sending information to it would 'bounce back'.
+
+<img style="float: left;" src="readme_images/tutorial-34.png" width=300 />
 
 #### Edges
 
@@ -25,6 +29,8 @@ An **edge** is the connection between two nodes. A node can also be connected to
 Much like nodes, we can also assign different types of information to edges. We can assign a **weight** to an edge, which can represent its *flow capacity*. We can also assign a **direction** to an edge, which can represent the *direction of flow*.
 
 For **example**, a person could be connected to a server via an edge, where the direction of the edge represents the direction of information flow. In this case, the person is the *source* of the information, and the server is the *destination* of the information. The server can answer back to the person in the opposite direction. This creates a *directed multi-edge network* between the node and the server. The weight of the edge can represent the amount of information that can be sent from the person to the server and vice versa. Since the weights need not be the same, we have *asymmetric connections* which simulate a network with a **bottleneck**.
+
+<img src="readme_images/fig1.gif"/>
 
 ### Implementation (Python)
 
@@ -46,7 +52,7 @@ Since we will often want to access the id of the node, we will create a **getter
 
 Since for the most part, we will almost always consider our nodes to be weighted and/or located in a space, we will instantiate the node with a **weight** and **location** attribute with **None** functional value.
 
-The Node class is implemented as follows:
+The **Node class** is implemented as follows:
 
 ```python
 
@@ -68,7 +74,7 @@ The Edge class represents a link between two nodes. It has two attributes that a
 
 Furthermore, we will also instantiate the edge with a unique **id** attribute, as well as a **weight** attribute with a **None** functional value and a **direction** attribute set by default to $0$. Direction is represented by an integer, where $0$ represents no direction, $1$ represents a directed edge from the source to the destination, and $-1$ represents a directed edge from the destination to the source.
 
-The Edge class is implemented as follows:
+The **Edge class** is implemented as follows:
 
 ```python
 
@@ -87,7 +93,7 @@ The Network class represents the network itself. It is a container for the nodes
 
 Further, to improve efficiency and reduce computation, on class instantiation, we will also create two additional dictionaries - the first contains node **locations** as keys, and their id as values. Since only one node can occupy a location, this will allow us to quickly check if a location is occupied and/or retrieve the node in question. The second dictionary contains the entire **adjacency** information of the network. This will allow us to quickly check if two nodes are connected by an edge, together with direction information.
 
-The Network class is implemented as follows:
+The **Network class** is implemented as follows:
 
 ```python
 
@@ -148,24 +154,27 @@ flowchart TD
 
 The network is a collection of vertices and edges. The vertices are connected by edges. The edges can be weighted, directed and/or weighted. The network can be used to find the optimal flow between two vertices. The flow is a path between two vertices. The flow is optimized by finding the path with the lowest weight.
 
-\[   \left\{
-\begin{array}{ll}
-      0 & x\leq a \\
-      \frac{x-a}{b-a} & a\leq x\leq b \\
-      \frac{c-x}{c-b} & b\leq x\leq c \\
-      1 & c\leq x \\
-\end{array} 
-\right. \]
 
-\[\mathsf C : \qquad 
-\begin{matrix}
-&& \vdots &&\\
-& \nearrow & s & \nwarrow &\\
-x_0 & \longrightarrow & \vdots & \leftarrow & x_1 \\
-& \searrow & s' & \swarrow &\\
-&& \vdots & 
-\end{matrix} \]
+## Toy Example: Recreating the Madrid Metro
 
-\[ \bullet  \swarrow \rightarrow \]
+We will now use the framework we have created to implement a simple network, and then use it to find an approximate position of all the metro stations in Madrid.
 
-$$ \int $$
+The only two constraints that we will have are the metro lines themselves, and the **geographical location** only of the **first** and **final node** of each line projected onto an xy-plane. The rest of the nodes will be placed with absolutely no bearing on their geographical location.
+
+### Data Extraction
+
+We use **Selenium** to extract the metro data from Wikipedia, and parse through the HTML to extract the station names, the metro lines they belong to, and the lines they connect to per station.
+
+From this extraction, we obtain the names of the first and last station of each line, then extract their geographical coordinates again from Wikipedia.
+
+### Network Creation
+
+We create a network with the stations as nodes, and the connections between stations as edges. Since this is a simple example, *we will not consider the distance between two stations as a weight*, and we will make the naive assumption that the *stations are equidistant* (note how this toy model will still give relatively accurate predictions).
+
+We then place the entire network on an xy-plane, with no consideration for location. The geographical coordinates are then converted to a unitless scale using a **Mercator** projection onto a 100x100 grid. We then move the first and last station of each line to their respective transformed geographical coordinates.
+
+### Algorithm: MSE minimization
+
+We fix in place all the endpoints, with the objective being to slowly move the rest of the nodes to their corresponding locations. We assign a set of moves that each node can perform - a cardinal move in the **N**orth/**S**outh/**E**ast/**W**est direction a very small amount. We then calculate the **mean squared error (MSE)** between the current network configuration and the previous one. If the MSE is improved, then we try the next node. If the MSE is not improved, we instead revert the move before continuing. We keep track of these failures, and if a node is deemed to be *stuck*, it is removed from the node pool. We repeat this process until the MSE is minimized to a certain threshold.
+
+The intention of this algorithm is to pull the nodes towards their corresponding locations, while also allowing for some randomness in the process. The randomness is introduced by the fact that the nodes are not moved in a deterministic manner, but rather in a random order. This allows for the nodes to be pulled towards their locations in a more efficient manner, as the nodes that are closer to their locations will be pulled towards them faster.
