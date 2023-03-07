@@ -2,9 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# music files
 *.mp4
 *.mp3
-wikipedia/
 data/
 # csv files
 *.csv
