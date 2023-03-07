@@ -3,6 +3,10 @@
 
 ## The Network
 
+
+
+<img src="readme_images/BHMtubemap.avif" width=900 height=600 />
+
 ### Structure
 
 The network consists of two basic components.
@@ -78,7 +82,30 @@ class Edge:
 
 #### Network
 
-The Network class represents the network itself. It is a container for the nodes and edges in the network. It has two attributes that are required to instantiate the object, that being its **nodes** and **edges**, the latter of which can default to **None**. The nodes and edges are stored in a dictionary, where the key is the id of the node/edge, and the value is the node/edge itself.
+The Network class represents the network itself. It is a container for the nodes and edges in the network. It has two attributes that are required to instantiate the object, those being its **nodes** and **edges**, the latter of which can default to **None** (Note that an edge cannot be in the network if its corresponding nodes aren't as well). The nodes and edges are stored in lists containing the entire object itself. However, we will also create a **dictionary translator** that maps the **id** of the node/edge to the object itself. This will allow us to access the node/edge by its id, which should significantly improve efficiency.
+
+Further, to improve efficiency and reduce computation, on class instantiation, we will also create two additional dictionaries - the first contains node **locations** as keys, and their id as values. Since only one node can occupy a location, this will allow us to quickly check if a location is occupied and/or retrieve the node in question. The second dictionary contains the entire **adjacency** information of the network. This will allow us to quickly check if two nodes are connected by an edge, together with direction information.
+
+The Network class is implemented as follows:
+
+```python
+
+class Network:
+    def __init__(self, nodes, edges=None):
+        self.nodes = nodes # list of nodes
+        self.edges = edges if edges else [] # list of edges
+        self.node_dict = {node.id: node for node in nodes} # dictionary of nodes
+        self.edge_dict = {edge.id: edge for edge in edges} # dictionary of edges
+        self.node_loc_dict = {node.loc: node.id for node in nodes} # node locations
+        self.adjacency_dict = {node.id: 
+                              {node.id: {
+                                         'edge' : [], 'dir_edge' : []
+                                        } for node in self.nodes} 
+                                          for node in self.nodes} 
+        # adjacency information
+        def populate_adjacency_dict():
+            ...
+```
 
 ### Design
 
