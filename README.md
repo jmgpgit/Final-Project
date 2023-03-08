@@ -16,11 +16,17 @@ The network consists of two basic components.
 
 These are the individual *entities* of the network. They can represent anything from a person to a computer to a city. They are connected by **edges**. A node can hold additional information about itself. One of the most used attributes given to a node is **weight**; weight can represent the relative importance of a node with respect to its neighbours.
 
-<img style="float: right;" src="readme_images/internet-schema-5.png" width=370/>
+
+
+<div>
+    <p style="float: right;"><img src="readme_images/internet-schema-5.png" width=370 /></p>
+</div>
+
 
 Let us consider an **example** of a node; a person. A person can be connected to other people, forming a social network. A person can also be connected to a server, forming a network of people and servers. Each individual could be assigned a weight, that can be ascribed a physical meaning. A simple example of a weight could be the **degree** of the node, that is, the amount of total connections that person has. However, we can also ascribe a different meaning, such as the amount of money that person has. In this latter case, note that the weight could be negative as well as any real number. A server could also be assigned a different type of weight, such as its current server load - if it were at capacity, then sending information to it would 'bounce back'.
 
 <img style="float: left;" src="readme_images/tutorial-34.png" width=300 />
+
 
 #### Edges
 
