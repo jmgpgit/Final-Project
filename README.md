@@ -161,6 +161,8 @@ We will now use the framework we have created to implement a simple network, and
 
 The only two constraints that we will have are the metro lines themselves, and the **geographical location** only of the **first** and **final node** of each line projected onto an xy-plane. The rest of the nodes will be placed with absolutely no bearing on their geographical location.
 
+<img src="exploration/madrid_metro/result_images/mapa_geografico.jpg"/>
+
 ### Data Extraction
 
 We use **Selenium** to extract the metro data from Wikipedia, and parse through the HTML to extract the station names, the metro lines they belong to, and the lines they connect to per station.
@@ -169,12 +171,38 @@ From this extraction, we obtain the names of the first and last station of each 
 
 ### Network Creation
 
-We create a network with the stations as nodes, and the connections between stations as edges. Since this is a simple example, *we will not consider the distance between two stations as a weight*, and we will make the naive assumption that the *stations are equidistant* (note how this toy model will still give relatively accurate predictions).
+We create a network with the stations as nodes, and the connections between stations as edges. Since this is a simple example, *we will not consider the distance between two stations as a weight*, and we will make the naive assumption that the *stations are equidistant* (note how this toy model will still give relatively accurate predictions). We then place the entire network on an xy-plane, with no consideration for location. Note that the spaces on the vertical lines of the graph represent stations that belong to multiple metro lines (and are represented by the line with the smallest number label). Connections are not represented for visual clarity.
 
-We then place the entire network on an xy-plane, with no consideration for location. The geographical coordinates are then converted to a unitless scale using a **Mercator** projection onto a 100x100 grid. We then move the first and last station of each line to their respective transformed geographical coordinates.
+<div style="text-align: center;">
+  <img src="exploration/madrid_metro/result_images/station_data_raw.png"/>
+</div>
+
+The geographical coordinates are then converted to a unitless scale using a **Mercator** projection onto a 100x100 grid. We then move the first and last station of each line to their respective transformed geographical coordinates.
+
+<div style="text-align: center;">
+  <img src="exploration/madrid_metro/result_images/station_data_move_ends.png"/>
+</div>
 
 ### Algorithm: MSE minimization
 
-We fix in place all the endpoints, with the objective being to slowly move the rest of the nodes to their corresponding locations. We assign a set of moves that each node can perform - a cardinal move in the **N**orth/**S**outh/**E**ast/**W**est direction a very small amount. We then calculate the **mean squared error (MSE)** between the current network configuration and the previous one. If the MSE is improved, then we try the next node. If the MSE is not improved, we instead revert the move before continuing. We keep track of these failures, and if a node is deemed to be *stuck*, it is removed from the node pool. We repeat this process until the MSE is minimized to a certain threshold.
+We fix in place all the endpoints, with the objective being to slowly move the rest of the nodes to their corresponding locations. We assign a set of moves that each node can perform - a cardinal move in the **N**orth/**S**outh/**E**ast/**W**est direction by a tiny amount $\epsilon$. We then calculate the **mean squared error (MSE)** between the current network configuration and the previous one. If the MSE improved, then we try the next node. If the MSE is not improved, we instead revert the move before continuing onto the next. We keep track of these failures, and if a node is deemed to be *stuck*, it is removed from the node pool. We repeat this process until the MSE is minimized to a certain threshold.
 
-The intention of this algorithm is to pull the nodes towards their corresponding locations, while also allowing for some randomness in the process. The randomness is introduced by the fact that the nodes are not moved in a deterministic manner, but rather in a random order. This allows for the nodes to be pulled towards their locations in a more efficient manner, as the nodes that are closer to their locations will be pulled towards them faster.
+The intention of this algorithm is to pull the nodes towards their corresponding locations, while also allowing for some randomness in the process. The randomness is introduced by the fact that the nodes are not moved in a deterministic manner, but rather in a random order.
+
+After a few iterations, we obtain the following plot:
+
+<div style="text-align: center;">
+  <img src="exploration/madrid_metro/result_images/station_data_post_optimization.png"/>
+</div>
+
+### Results
+
+We can see that the algorithm has successfully placed the nodes in their corresponding locations, with the exception of a few outliers. The outliers are due to the fact that the algorithm is not deterministic, and the nodes are not moved in a deterministic manner. The algorithm is also not perfect, and is prone to getting stuck in local minima. However, the algorithm is able to place the nodes in their corresponding locations with a high degree of accuracy.
+
+Since this model was intentionally simplistic, we have no good way of measuring the accuracy of the model and its result. However, we can instead superimpose the result of the algorithm onto a map of Madrid, and compare it to the actual metro map.
+
+<div style="text-align: center;">
+  <img src="exploration/madrid_metro/result_images/superimposed.jpg"/>
+</div>
+
+Other than the northern end of line 10, most of the stations have been placed in an interpretable manner. The line 10 error can be explained due to the fact that it goes out of the city and has a snaking path. The algorithm is not able to account for this, and thus places the stations in a straight line with a singular bend. This is a limitation of the model, and is not a flaw in the algorithm.
