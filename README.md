@@ -189,9 +189,45 @@ The geographical coordinates are then converted to a unitless scale using a **Me
   <img src="exploration/madrid_metro/result_images/station_data_move_ends.png"/>
 </div>
 
-### Algorithm: MSE minimization
+### Algorithm: RMSE minimization
 
-We fix in place all the endpoints, with the objective being to slowly move the rest of the nodes to their corresponding locations. We assign a set of moves that each node can perform - a cardinal move in the **N**orth/**S**outh/**E**ast/**W**est direction by a tiny amount $\epsilon$. We then calculate the **mean squared error (MSE)** between the current network configuration and the previous one. If the MSE improved, then we try the next node. If the MSE is not improved, we instead revert the move before continuing onto the next. We keep track of these failures, and if a node is deemed to be *stuck*, it is removed from the node pool. We repeat this process until the MSE is minimized to a certain threshold.
+We fix in place all the endpoints, with the objective being to slowly move the rest of the nodes to their corresponding locations. We assign a set of moves that each node can perform - a cardinal move in the **N**orth/**S**outh/**E**ast/**W**est direction by a tiny amount $\epsilon$. We then calculate the **(root) mean squared error (RMSE)** between the current network configuration and the previous one. If the RMSE improved, then we try the next node. If the RMSE is not improved, we instead revert the move before continuing onto the next. We keep track of these failures, and if a node is deemed to be *stuck*, it is removed from the node pool. We repeat this process until the RMSE is minimized to a certain threshold.
+
+```python
+
+class Station(Node):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+        self.cardinal_cycle = itertools.cycle(['N', 'E', 'S', 'W'])
+
+    def cardinal_move(self, epsilon):
+      self.move(self.cardinal_cycle.next(), epsilon)
+
+    def distance(self, other):
+        return np.sqrt((self.loc[0] - other.loc[0])**2 + (self.loc[1] - other.loc[1])**2)
+
+class Connection(Edge):
+    def __init__(self, station1, station2,line):
+        super().__init__(station1, station2)
+        self.line = line
+        self.target_weight = 2 # 2 units of error, arbitrarily chosen
+        self.weight = lambda x : Station.distance(x.station1, x.station2)
+        # For better accuracy, we could use spherical distance instead of euclidean distance
+
+class Metro(Network):
+    def RMSE(self,station):
+    error_vector = [(station.adjacent_edge.weight - station.adjacent_edge.target_weight)**2 for adjacent_edge in station.adjacent_edges]
+    return np.sqrt(np.mean(error_vector))
+
+    def optimize(self, epsilon=0.001, threshold=0.01):
+        # We fix the endpoints, and move the rest of the nodes
+        # We keep track of the nodes that are stuck, and remove them from the pool
+        # We repeat this process until the RMSE is minimized to a certain threshold
+        # We return the final RMSE
+        ...
+
+```
 
 The intention of this algorithm is to pull the nodes towards their corresponding locations, while also allowing for some randomness in the process. The randomness is introduced by the fact that the nodes are not moved in a deterministic manner, but rather in a random order.
 
@@ -205,7 +241,7 @@ After a few iterations, we obtain the following plot:
 
 We can see that the algorithm has successfully placed the nodes in their corresponding locations, with the exception of a few outliers. The outliers are due to the fact that the algorithm is not deterministic, and the nodes are not moved in a deterministic manner. The algorithm is also not perfect, and is prone to getting stuck in local minima. However, the algorithm is able to place the nodes in their corresponding locations with a high degree of accuracy.
 
-Since this model was intentionally simplistic, we have no good way of measuring the accuracy of the model and its result. However, we can instead superimpose the result of the algorithm onto a map of Madrid, and compare it to the actual metro map.
+Since this model was intentionally simplistic, we have no good way of measuring the accuracy of the model and its result. However, we can instead superimpose the result of the algorithm onto a map of Madrid, and visually compare it to the actual metro map.
 
 <div style="text-align: center;">
   <img src="exploration/madrid_metro/result_images/superimposed.jpg"/>
