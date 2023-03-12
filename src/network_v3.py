@@ -387,7 +387,7 @@ class Network:
             visited.update(subnetworks[-1])
         return subnetworks
     
-    def find_path(self,node1, node2, minimize = True):
+    def find_path(self,node1, node2, func = lambda x : x[2]):
         if node1 not in self.nodes or node2 not in self.nodes:
             raise ValueError('node not in network')
         if node1 == node2:
@@ -404,8 +404,7 @@ class Network:
                 if edge.other_node(next) == node2:
                     return new_path
                 queue.append((edge.other_node(next), new_path, dist + edge.weight))
-                if minimize:
-                    queue = deque(sorted(queue, key=lambda x: x[2]))
+                queue = deque(sorted(queue, key=func))
         return None
     
     
@@ -422,5 +421,19 @@ class Network:
             return []
         edges = []
         for i in range(len(path[1:])):
-            edges.append(self.get_edge(path[i-1], path[i]))
-            
+            edge = self.get_edge(path[i], path[i+1])
+            edges.append(edge)
+        return edges
+    
+    
+    def path_weight(self, edges):
+        return sum([edge.weight for edge in edges])
+    
+    def full_path(self, node1, node2, func = lambda x : x[2]):
+        nodes = self.find_path(node1, node2, func)
+        if nodes is None:
+            return None
+        edges = self.fill_path_edges(nodes)
+        weight = self.path_weight(edges)
+        return nodes, edges, weight, len(nodes)
+    

@@ -721,3 +721,13 @@ class Network:
             queue = deque(sorted(queue, key = lambda x: func(self.translate_nodes(x[1]))))
         return None
     
+    
+    def recalculate_adj(self):
+        for i in self.adj:
+            for j in self.adj[i]:
+                self.adj[i][j]['edge'] = []
+                self.adj[i][j]['dir_edge'] = []
+        for i in self.edges:
+            self.adj[i[0]][i[1]]['edge'].append(i)
+            self.adj[i[1]][i[0]]['edge'].append(i)
+            self.adj[i[0]][i[1]]['dir_edge'].append(i)

@@ -234,17 +234,17 @@ The intention of this algorithm is to pull the nodes towards their corresponding
 After a few iterations, we obtain the following plot:
 
 <div style="text-align: center;">
-  <img src="exploration/madrid_metro/result_images/station_data_post_optimization.png"/>
+  <img src="exploration/madrid_metro/result_images/station_data_post_optimization_transparent_with_lines.png"/>
 </div>
 
 ### Results
 
-We can see that the algorithm has successfully placed the nodes in their corresponding locations, with the exception of a few outliers. The outliers are due to the fact that the algorithm is not deterministic, and the nodes are not moved in a deterministic manner. The algorithm is also not perfect, and is prone to getting stuck in local minima. However, the algorithm is able to place the nodes in their corresponding locations with a high degree of accuracy.
+We can see that the algorithm has successfully placed the nodes in their corresponding locations, with the exception of a few outliers and bugs. The algorithm is also not perfect, and is prone to getting stuck in local minima. However, the algorithm has placed the nodes in their corresponding locations with a high degree of accuracy.
 
 Since this model was intentionally simplistic, we have no good way of measuring the accuracy of the model and its result. However, we can instead superimpose the result of the algorithm onto a map of Madrid, and visually compare it to the actual metro map.
 
 <div style="text-align: center;">
-  <img src="exploration/madrid_metro/result_images/superimposed.jpg"/>
+  <img src="exploration/madrid_metro/result_images/superimposed.png"/>
 </div>
 
 Other than the northern end of line 10, most of the stations have been placed in an interpretable manner. The line 10 error can be explained due to the fact that it goes out of the city and has a snaking path. The algorithm is not able to account for this, and thus places the stations in a straight line with a singular bend. This is a limitation of the model, and is not a flaw in the algorithm.
