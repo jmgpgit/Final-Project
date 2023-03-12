@@ -279,7 +279,7 @@ class Edge:
         return hash(self.id)
     def __eq__(self, o: object) -> bool:
         if isinstance(o, Edge):
-            return tuple_eq(self.node_ids, o.node_ids) and self.dir == o.dir
+            return tuple_eq(self.nodes, o.nodes) and self.dir(None) == o.dir(None)
         return False
     def __repr__(self) -> str:
         if self.dir:
@@ -554,8 +554,9 @@ class Network:
         queue = deque([node])
         while queue:
             next = queue.popleft()
+            print(next,len(queue))
             visited.add(next)
-            queue.extend([ids for ids in self.adj[next] if ids not in visited and self.adj[next][ids]['edge']])
+            queue.extend([ids for ids in self.adj[next] if ids not in visited])
         if untranslated:
             return visited
         return set(map(self.translate_node , visited))
@@ -566,18 +567,8 @@ class Network:
         edges =  []
         while nodes:
             next = nodes.popleft()
-            if dir:
-                 for i in self.adj[next].values():
-                    for j in i['dir_edge']:
-                        if j not in edges:
-                            edges.append(j)
-            else:
-                for i in self.adj[next].values():
-                    for j in i['edge']:
-                        if j not in edges:
-                            edges.append(j)
-
-        
+            for i in self.adj[next].values():
+                edges.append(i) if i not in edges else None
         return Network(nodescopy, [self.translate_edge(i) for i in edges])
     
     def subnetworks(self, dir = False):
@@ -609,7 +600,7 @@ class Network:
             path.append(next)
             if next == node2:
                 return self.translate_nodes(path)
-            queue.extend([(ids, path.copy()) for ids in self.adj[next] if ids not in visited and (dir or self.adj[next][ids]['edge'])])
+            queue.extend([(ids, path.copy()) for ids in self.adj[next] if ids not in visited])
         return None
     
     
