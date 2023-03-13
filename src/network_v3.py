@@ -388,6 +388,11 @@ class Network:
         return subnetworks
     
     def find_path(self,node1, node2, func = lambda x : x[2]):
+        """finds a path between two nodes using a function to sort the queue
+        
+        func should take a tuple of (node, path, dist) and return a value to sort by
+        default sorts by path-weight
+        """
         if node1 not in self.nodes or node2 not in self.nodes:
             raise ValueError('node not in network')
         if node1 == node2:
@@ -428,6 +433,9 @@ class Network:
     
     def path_weight(self, edges):
         return sum([edge.weight for edge in edges])
+    
+    def path_weight_optimal(self, node1, node2):
+        return self.path_weight(self.fill_path_edges(self.find_path(node1, node2)))
     
     def full_path(self, node1, node2, func = lambda x : x[2]):
         nodes = self.find_path(node1, node2, func)
