@@ -2,6 +2,10 @@
 
 # Network Optimisation
 
+## Introduction
+
+There is a surprising similarity between many of the structures that we encounter and interact with in our day to day life and that of the very simplistic but powerful idea of a **graph**, or more generally, a **network**. This similarity is not only limited to the physical world, but also extends to the digital world, where we can find networks in the form of the internet, social networks, and even the human body. The most ubiquitous networks are **transportation** networks, consisting of features such as roads or railways, whose purpose is to facilitate the movement of people and goods. These networks are often **spatial**, meaning that they are located in a space, and are often **weighted**, meaning that they have a cost associated with them. In this project, we will be exploring the idea of a **transportation network**, and will be implementing an optimisation algorithm that will find the **optimal location** for a provider to maximize their potential to interact with their clients, while taking into consideration ideas such as location cost, customer density and traffic.
+
 ## The Network
 
 
@@ -30,11 +34,11 @@ Let us consider an **example** of a node; a person. A person can be connected to
 
 #### Edges
 
-An **edge** is the connection between two nodes. A node can also be connected to itself via an edge, forming a **loop**. More generally, a **cycle** is a path that begins and ends at the same node without passing through the same edges. Further, we will also allow for **multi-edges**, where consider two or more distinct edges between the same two nodes.
+An **edge** is the connection between two nodes. A node can also be connected to itself via an edge, forming a **loop**. More generally, a **cycle** is a path that begins and ends at the same node without passing through the same edges.
 
 Much like nodes, we can also assign different types of information to edges. We can assign a **weight** to an edge, which can represent its *flow capacity*. We can also assign a **direction** to an edge, which can represent the *direction of flow*.
 
-For **example**, a person could be connected to a server via an edge, where the direction of the edge represents the direction of information flow. In this case, the person is the *source* of the information, and the server is the *destination* of the information. The server can answer back to the person in the opposite direction. This creates a *directed multi-edge network* between the node and the server. The weight of the edge can represent the amount of information that can be sent from the person to the server and vice versa. Since the weights need not be the same, we have *asymmetric connections* which simulate a network with a **bottleneck**.
+For **example**, a person could be connected to a server via an edge, where the direction of the edge represents the direction of information flow. In this case, the person is the *source* of the information, and the server is the *destination* of the information. The server can answer back to the person in the opposite direction. This creates a *directed network* between the node and the server. The weight of the edge can represent the amount of information that can be sent from the person to the server and vice versa. Since the weights need not be the same, we have *asymmetric connections* which simulate a network with a **bottleneck**.
 
 <img src="readme_images/fig1.gif"/>
 
@@ -54,9 +58,7 @@ Furthermore, for most of the generic class attributes, we will use a functional 
 
 The Node class is a simple class that represents a node in the network. It has a single attribute that is instantiated when the object is created, that being its **id**, a unique identifier for the node. For this, we generate a random 128-bit string using the **uuid** module. The id is used to identify the node in the network, and will also be especially useful when we implement the edge class.
 
-Since we will often want to access the id of the node, we will create a **getter** function for the id. This will allow us to access the id of the node without having to access the attribute directly. This is useful since we can then **override** the getter function in the derived classes, and thus change the behaviour of the id attribute. This is especially useful when we want to change the id of the node to something more meaningful, such as the name of the node.
-
-Since for the most part, we will almost always consider our nodes to be weighted and/or located in a space, we will instantiate the node with a **weight** and **location** attribute with **None** functional value.
+Since for the most part, we will almost always consider our nodes to be weighted and located in a space, we will instantiate the node with a **weight** with **None** functional value and a **location** attribute.
 
 The **Node class** is implemented as follows:
 
@@ -68,7 +70,7 @@ constant_fn = lambda x: lambda y: x # constant function
 # E.g.:   constant_fn(x)(y) = x
 
 class Node:
-    def __init__(self):
+    def __init__(self,loc):
         self.id = uuid4().hex # generate a random 128-bit string
         self.loc = constant_fn(None) # location of the node
         self.weight = constant_fn(None) # weight of the node
@@ -120,60 +122,21 @@ class Network:
             ...
 ```
 
-### Design
-
-
-### Architecture
-
-
-
-
-
-First we create the basic framework on which we can work. We require the use of classes and inheritance to attain the maximal generality in order to fully investigate our problem.
-
-Network architecture:
-
-
-```mermaid
-
-flowchart TD
-    A[Vertex] -->|add weight| B(Weighted Vertex)
-    E[Edge] -->|add weight| G[Weighted Edge]
-    E[Edge] -->|add direction| H[Directed Edge]
-    G[Weighted Edge] --->|add direction| I
-    H[Directed Edge] --->|add weight| I
-    I(Directed Weighted Edge) <--> C{Network}
-    B <--> C{Network}
-
-    C -->|flow| D[Path]
-    C -->|flow| X[Path]
-    C -->|flow| Z[Path]
-    C -->|flow| Y[...]
-
-
-
-    D -->J[Optimization]
-    Z -->J[Optimization]
-    X -->J[Optimization]
-    Y -->J[Optimization]
-```
-
-The network is a collection of vertices and edges. The vertices are connected by edges. The edges can be weighted, directed and/or weighted. The network can be used to find the optimal flow between two vertices. The flow is a path between two vertices. The flow is optimized by finding the path with the lowest weight.
-
-
-## Toy Example: Recreating the Madrid Metro
+## Toy Example: Recreating the Madrid Metro by Optimizing Node Locations
 
 We will now use the framework we have created to implement a simple network, and then use it to find an approximate position of all the metro stations in Madrid.
 
-The only two constraints that we will have are the metro lines themselves, and the **geographical location** only of the **first** and **final node** of each line projected onto an xy-plane. The rest of the nodes will be placed with absolutely no bearing on their geographical location.
+The only two constraints that we will have are the metro lines themselves, and the **geographical location** only of the **first** and **final node** of each line projected onto an xy-plane. The rest of the nodes will be placed with absolutely no bearing on their geographical location. This will allow us to create a toy model that will allow us to test our framework.
+
+**Note:** The code for this example can be found in the **madrid_metro** folder.
 
 <img src="exploration/madrid_metro/result_images/mapa_geografico.jpg"/>
 
 ### Data Extraction
 
-We use **Selenium** to extract the metro data from Wikipedia, and parse through the HTML to extract the station names, the metro lines they belong to, and the lines they connect to per station.
+We use **Selenium** to extract the metro data from Wikipedia, and parse through the HTML to extract the station names, the metro lines they belong to, and the lines they connect to per station. We will only consider lines $1-10$ since the rest contain no interesting intersection with the rest of the network.
 
-From this extraction, we obtain the names of the first and last station of each line, then extract their geographical coordinates again from Wikipedia.
+From this extraction, we obtain the names of the first and last station of each line, then extract their latitude and longitude again from Wikipedia.
 
 ### Network Creation
 
@@ -184,6 +147,8 @@ We create a network with the stations as nodes, and the connections between stat
 </div>
 
 The geographical coordinates are then converted to a unitless scale using a **Mercator** projection onto a 100x100 grid. We then move the first and last station of each line to their respective transformed geographical coordinates.
+
+The following could be considered our **initial guess** of the network configuration.
 
 <div style="text-align: center;">
   <img src="exploration/madrid_metro/result_images/station_data_move_ends.png"/>
@@ -239,7 +204,7 @@ After a few iterations, we obtain the following plot:
 
 ### Results
 
-We can see that the algorithm has successfully placed the nodes in their corresponding locations, with the exception of a few outliers and bugs. The algorithm is also not perfect, and is prone to getting stuck in local minima. However, the algorithm has placed the nodes in their corresponding locations with a high degree of accuracy.
+We can see that the algorithm has successfully placed the nodes in their corresponding locations, with the exception of a few outliers and bugs. The algorithm is also not perfect, and is prone to getting stuck in local minima, or rather, the geography the the real metro line does not follow minima. However, the algorithm has placed the nodes in their corresponding locations with a high degree of accuracy.
 
 Since this model was intentionally simplistic, we have no good way of measuring the accuracy of the model and its result. However, we can instead superimpose the result of the algorithm onto a map of Madrid, and visually compare it to the actual metro map.
 
@@ -247,4 +212,55 @@ Since this model was intentionally simplistic, we have no good way of measuring 
   <img src="exploration/madrid_metro/result_images/superimposed.png"/>
 </div>
 
-Other than the northern end of line 10, most of the stations have been placed in an interpretable manner. The line 10 error can be explained due to the fact that it goes out of the city and has a snaking path. The algorithm is not able to account for this, and thus places the stations in a straight line with a singular bend. This is a limitation of the model, and is not a flaw in the algorithm.
+Most of the stations have been placed in an interpretable manner. The algorithm is not able to account for bends, since they are inherently *unnatural* within the context of minimization, but not within the context of practical use. This is a limitation of the model, and is not a flaw in the algorithm.
+
+
+
+# Intercity Distribution Optimisation
+
+## Introduction
+
+For the second part of the project, we will be considering how to optimise the location of distributors and/or vendors in order to maximise the proximity to the greatest number of potential customers, while accounting for variables such as the cost of transportation and the cost of the distributors themselves.
+
+Since such detailed data is not available, we will be using a simplified model of a city, where customers and distributors are represented by points on a 2D plane. The cost of transportation is represented by the distance between the customer and the distributor. We will be gradually adding more complexity to the model, and simultaneously improve the algorithm to account for it.
+
+## Model: Procedural Generation of Cities
+
+
+### Architecture
+
+
+
+
+
+First we create the basic framework on which we can work. We require the use of classes and inheritance to attain the maximal generality in order to fully investigate our problem.
+
+Network architecture:
+
+
+```mermaid
+
+flowchart TD
+    A[Vertex] -->|add weight| B(Weighted Vertex)
+    E[Edge] -->|add weight| G[Weighted Edge]
+    E[Edge] -->|add direction| H[Directed Edge]
+    G[Weighted Edge] --->|add direction| I
+    H[Directed Edge] --->|add weight| I
+    I(Directed Weighted Edge) <--> C{Network}
+    B <--> C{Network}
+
+    C -->|flow| D[Path]
+    C -->|flow| X[Path]
+    C -->|flow| Z[Path]
+    C -->|flow| Y[...]
+
+
+
+    D -->J[Optimization]
+    Z -->J[Optimization]
+    X -->J[Optimization]
+    Y -->J[Optimization]
+```
+
+The network is a collection of vertices and edges. The vertices are connected by edges. The edges can be weighted, directed and/or weighted. The network can be used to find the optimal flow between two vertices. The flow is a path between two vertices. The flow is optimized by finding the path with the lowest weight.
+
