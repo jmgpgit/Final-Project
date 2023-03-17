@@ -399,3 +399,7 @@ Finally, we take the traffic factor into account.
   <img src="exploration/supply_chain/madrid_images/fewer_wct.png"/>
 
 Although still far away from the solution, since there is a lot of uncertainty due to procedural generation, we cannot confirm if our last step is an improvement or not. We can, however, confirm that the algorithm is working as intended, as the last image resembles the original image, but with the clinics distributed more evenly.
+
+## Conclusion
+
+From this we can conclude that real world problems can be very complex, and that the solution to these problems can be very difficult to find. However, given enough data, and a good algorithm, we can find a solution that is good enough for our purposes.
