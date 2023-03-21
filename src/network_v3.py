@@ -24,15 +24,19 @@ from more_itertools import unzip, chunked, chunked_even, minmax, filter_except, 
 
 
 def tuple_eq(tup1,tup2):
+    # checks if two tuples have equal values
     return len(set(tup1).union(set(tup2))) == len(tup1) == len(tup2)
     
 def tuple_rev(tup):
+    # reverses a tuple
     return (tup[1],tup[0])
 
 def tuple_int(tup1,tup2):
+    # checks if two tuples intersect
     return len(set(tup1).union(set(tup2))) < len(tup1) + len(tup2)
 
 def tuple_sum(tup1,tup2):
+    # Adds values of two tuples
     return tuple(map(sum,zip(tup1,tup2)))
 
 
